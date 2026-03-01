@@ -1,0 +1,128 @@
+index.php file (npx autocannon -c 100 -d 10 http://localhost/test/)
+<?php
+// console.log() ki jagah error_log() ya echo use karein
+// Server logs mein dekhne ke liye:
+error_log("Before Async Operation");
+
+// fs.readFileSync() ka equivalent PHP mein file_get_contents() hai
+$fileContent = file_get_contents("./non-blocking-1.txt");
+
+error_log("After async operation completed");
+
+// res.writeHead(200, ...) ke liye header() function use karein
+header('Content-Type: application/json');
+http_response_code(200);
+
+// res.end(JSON.stringify(...)) ka equivalent json_encode() aur echo hai
+echo json_encode(["message" => "Server testing"]);
+?>
+Running 10s test @ http://localhost/test/
+100 connections
+
+┌─────────┬──────┬────────┬────────┬────────┬───────────┬──────────┬────────┐
+│ Stat    │ 2.5% │ 50%    │ 97.5%  │ 99%    │ Avg       │ Stdev    │ Max    │
+├─────────┼──────┼────────┼────────┼────────┼───────────┼──────────┼────────┤
+│ Latency │ 3 ms │ 123 ms │ 415 ms │ 517 ms │ 131.09 ms │ 86.99 ms │ 829 ms │
+└─────────┴──────┴────────┴────────┴────────┴───────────┴──────────┴────────┘
+┌───────────┬────────┬────────┬────────┬────────┬────────┬─────────┬────────┐
+│ Stat      │ 1%     │ 2.5%   │ 50%    │ 97.5%  │ Avg    │ Stdev   │ Min    │
+├───────────┼────────┼────────┼────────┼────────┼────────┼─────────┼────────┤
+│ Req/Sec   │ 617    │ 617    │ 769    │ 1,033  │ 807.7  │ 127.71  │ 617    │
+├───────────┼────────┼────────┼────────┼────────┼────────┼─────────┼────────┤
+│ Bytes/Sec │ 169 kB │ 169 kB │ 211 kB │ 283 kB │ 221 kB │ 34.9 kB │ 169 kB │
+└───────────┴────────┴────────┴────────┴────────┴────────┴─────────┴────────┘
+
+Req/Bytes counts sampled once per second.
+# of samples: 10
+
+8k requests in 10.83s, 2.21 MB read
+
+(server.js)
+Synchronous Operation (npx autocannon -c 100 -d 10 http://localhost:3000)
+process.env.UV_THREADPOOL_SIZE = 64;
+const http = require("http")
+const fs = require("fs")
+const PORT = 3000
+
+const server = http.createServer((req, res) => {
+     console.log(`Before Async Operation`)
+
+    // Non-Blocking the server
+    fs.readFileSync("./non-blocking-1.txt", `utf-8`)
+    
+    console.log(`After async operation completed`)
+
+    res.writeHead(200, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({ message: "Server testing"}));
+})
+
+server.listen(PORT, (err) => {
+    if (err) return console.log("Error:", err);
+    console.log(`Server listen on port: ${PORT}`)
+})
+Running 10s test @ http://localhost:3000
+100 connections
+
+┌─────────┬───────┬────────┬────────┬────────┬───────────┬──────────┬────────┐  
+│ Stat    │ 2.5%  │ 50%    │ 97.5%  │ 99%    │ Avg       │ Stdev    │ Max    │  
+├─────────┼───────┼────────┼────────┼────────┼───────────┼──────────┼────────┤  
+│ Latency │ 39 ms │ 228 ms │ 508 ms │ 525 ms │ 238.57 ms │ 90.12 ms │ 905 ms │  
+└─────────┴───────┴────────┴────────┴────────┴───────────┴──────────┴────────┘  
+┌───────────┬─────────┬─────────┬─────────┬────────┬─────────┬───────┬─────────┐
+│ Stat      │ 1%      │ 2.5%    │ 50%     │ 97.5%  │ Avg     │ Stdev │ Min     │
+├───────────┼─────────┼─────────┼─────────┼────────┼─────────┼───────┼─────────┤
+│ Req/Sec   │ 324     │ 324     │ 407     │ 518    │ 414.9   │ 59.53 │ 324     │
+├───────────┼─────────┼─────────┼─────────┼────────┼─────────┼───────┼─────────┤
+│ Bytes/Sec │ 65.5 kB │ 65.5 kB │ 82.2 kB │ 105 kB │ 83.8 kB │ 12 kB │ 65.4 kB │
+└───────────┴─────────┴─────────┴─────────┴────────┴─────────┴───────┴─────────┘
+
+Req/Bytes counts sampled once per second.
+# of samples: 10
+
+4k requests in 10.22s, 838 kB read
+
+Asynchronous Operation (npx autocannon -c 100 -d 10 http://localhost:3000)
+process.env.UV_THREADPOOL_SIZE = 64;
+const http = require("http")
+const fs = require("fs")
+const PORT = 3000
+
+const server = http.createServer((req, res) => {
+     console.log(`Before Async Operation`)
+
+    // Non-Blocking the server
+    fs.readFile("./non-blocking-1.txt", `utf-8`, (err, data) => {
+
+    })
+    
+    console.log(`After async operation completed`)
+
+    res.writeHead(200, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({ message: "Server testing"}));
+})
+
+server.listen(PORT, (err) => {
+    if (err) return console.log("Error:", err);
+    console.log(`Server listen on port: ${PORT}`)
+})
+Running 10s test @ http://localhost:3000
+100 connections
+
+
+┌─────────┬───────┬────────┬────────┬────────┬───────────┬──────────┬────────┐
+│ Stat    │ 2.5%  │ 50%    │ 97.5%  │ 99%    │ Avg       │ Stdev    │ Max    │
+├─────────┼───────┼────────┼────────┼────────┼───────────┼──────────┼────────┤
+│ Latency │ 37 ms │ 186 ms │ 514 ms │ 542 ms │ 198.84 ms │ 90.67 ms │ 570 ms │
+└─────────┴───────┴────────┴────────┴────────┴───────────┴──────────┴────────┘
+┌───────────┬─────────┬─────────┬────────┬────────┬────────┬─────────┬─────────┐
+│ Stat      │ 1%      │ 2.5%    │ 50%    │ 97.5%  │ Avg    │ Stdev   │ Min     │
+├───────────┼─────────┼─────────┼────────┼────────┼────────┼─────────┼─────────┤
+│ Req/Sec   │ 304     │ 304     │ 495    │ 679    │ 498.9  │ 106.18  │ 304     │
+├───────────┼─────────┼─────────┼────────┼────────┼────────┼─────────┼─────────┤
+│ Bytes/Sec │ 61.4 kB │ 61.4 kB │ 100 kB │ 137 kB │ 101 kB │ 21.4 kB │ 61.4 kB │
+└───────────┴─────────┴─────────┴────────┴────────┴────────┴─────────┴─────────┘
+
+Req/Bytes counts sampled once per second.
+# of samples: 10
+
+5k requests in 10.18s, 1.01 MB read
