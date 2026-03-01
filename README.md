@@ -1,5 +1,7 @@
 # Single or Multithread Problem
 
+git remote -v
+
 This repository explores the concepts of single-threaded and multi-threaded execution through examples in different programming languages.
 
 ## Overview
@@ -106,7 +108,7 @@ Running 10s test @ http://localhost:3000
 
 Req/Bytes counts sampled once per second.
 # of samples: 10
-
+n
 4k requests in 10.19s, 717 kB read
 
 ## 2
@@ -130,3 +132,27 @@ Req/Bytes counts sampled once per second.
 # of samples: 10
 
 2k requests in 10.35s, 445 kB read
+
+
+## 3
+Running 10s test @ http://localhost:3000
+100 connections
+
+
+┌─────────┬───────┬────────┬────────┬────────┬───────────┬───────────┬─────────┐ 
+│ Stat    │ 2.5%  │ 50%    │ 97.5%  │ 99%    │ Avg       │ Stdev     │ Max     │ 
+├─────────┼───────┼────────┼────────┼────────┼───────────┼───────────┼─────────┤ 
+│ Latency │ 26 ms │ 315 ms │ 782 ms │ 873 ms │ 326.65 ms │ 186.91 ms │ 1013 ms │ 
+└─────────┴───────┴────────┴────────┴────────┴───────────┴───────────┴─────────┘ 
+┌───────────┬─────────┬─────────┬─────────┬───────┬─────────┬─────────┬─────────┐
+│ Stat      │ 1%      │ 2.5%    │ 50%     │ 97.5% │ Avg     │ Stdev   │ Min     │
+├───────────┼─────────┼─────────┼─────────┼───────┼─────────┼─────────┼─────────┤
+│ Req/Sec   │ 141     │ 141     │ 321     │ 391   │ 301.11  │ 81.41   │ 141     │
+├───────────┼─────────┼─────────┼─────────┼───────┼─────────┼─────────┼─────────┤
+│ Bytes/Sec │ 28.5 kB │ 28.5 kB │ 64.9 kB │ 79 kB │ 60.8 kB │ 16.4 kB │ 28.5 kB │
+└───────────┴─────────┴─────────┴─────────┴───────┴─────────┴─────────┴─────────┘
+
+Req/Bytes counts sampled once per second.
+# of samples: 10
+
+3k requests in 10.23s, 608 kB read

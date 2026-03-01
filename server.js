@@ -1,34 +1,26 @@
 const http = require("http")
 const fs = require("fs")
+process.env.UV_THREADPOOL_SIZE = 64
 const PORT = 3000
 
-const server = http.createServer((req, res) => {
-    // console.log(`Before Sync`)
-
-    // // Block the server
-    // fs.appendFileSync("./blocking-2.txt", `Synchronous (Blocking) Operation \n`)
-    
-    // console.log(`After sync operation completed`)
-
-
-    console.log(`Before Async Operation`)
-
-    // Block the server
-    fs.appendFile("./non-blocking-2.txt", `Asynchronous (Non-Blocking) Operation \n`, (err, data) => {
-        if(err){
-            console.log(`Error inside non-blocking operation`)
+const server = http.createServer(async(req, res) => {
+    try{
+        if(req.url!="/favicon.ico"){
+            console.log(req.url)
+            console.log(`Before Async Operation`)
+            fs.readFile("./non-blocking-1.txt", "utf-8", (err, data) => {
+                res.writeHead(200, {"Content-Type": "application/json"})
+                res.end(JSON.stringify({message: "File read suffessfully"}))
+            });
+            console.log(`After Asynchronous operation`)
         }
-        console.log(`**** response from the callback`)
-    })
-    
-    console.log(`After async operation completed`)
-
-
-    res.writeHead(200, {"Content-Type": "application/json"});
-    res.end(JSON.stringify({ message: "Server testing"}));
+    }catch(err){
+        console.log(`Error inside server`, err)
+        res.writeHead(500)
+        res.end(`Internal server error ${JSON.stringify(err)}`)
+    }
 })
 
 server.listen(PORT, (err) => {
-    if (err) return console.log("Error:", err);
-    console.log(`Server listen on port: ${PORT}`)
+    console.log(`Server listine on port ${PORT}`)
 })
